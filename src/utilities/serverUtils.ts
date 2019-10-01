@@ -5,11 +5,14 @@ const MOD: string = "serverUtils.ts";
 
 export default class ServerUtils {
     private static logger: Logger = new Logger();
+    private static guild: Discord.Guild;
 
-    static addRoleToUser(memb: Discord.GuildMember, role: Discord.Role): void {
+    static addRoleToUser(memb: Discord.GuildMember, role: Discord.Role, errCallback?: () => void): void {
         memb.addRole(role)
             .catch(err => {
                 this.logger.error(`Failed to add ${role.name} role to ${memb}. Error: ${err}`, MOD);
+
+                if (errCallback) errCallback();
             });
     }
 
@@ -46,5 +49,17 @@ export default class ServerUtils {
             .catch((err) => {
                 this.logger.warn(`Failed to delete message. Error: ${err}`, MOD);
             });
+    }
+
+    static getMembers(): Discord.Collection<string, Discord.GuildMember> {
+        return this.guild.members;
+    }
+
+    static getMemberForUser(user: Discord.User): Discord.GuildMember {
+        return this.guild.member(user);
+    }
+
+    static setGuild(_guild: Discord.Guild): void {
+        this.guild = _guild;
     }
 };

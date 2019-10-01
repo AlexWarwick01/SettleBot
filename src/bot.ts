@@ -18,9 +18,11 @@ var authProd = require('./auth.prod.json');
 //#region Modules
 import {CommandHandler, CommandType} from "./handlers/commandHandler";
 import {FilterService} from "./services/filterService";
+import { GatekeeperService } from './services/gatekeeperService';
 
 var cmdHandler = container.resolve(CommandHandler);
 var filterService = container.resolve(FilterService);
+var gatekeeper = container.resolve(GatekeeperService);
 //#endregion
 
 const MOD = "bot.ts";
@@ -49,6 +51,10 @@ bot.on('ready', () => {
 
     cmdHandler.startup();
     cmdHandler.setup(bot);
+});
+
+bot.on('messageReactionAdd', (react, user) => {
+    gatekeeper.checkReaction(react, user);
 });
 
 bot.on('message', msg => {

@@ -7,10 +7,13 @@ import { MemberService } from '../services/memberService';
 import { FilterService } from '../services/filterService';
 import { CmlService } from '../services/cmlService';
 import { ConfigService } from '../services/configService';
-
-import { Logger } from '../utilities/logger';
 import { HelpService } from '../services/helpService';
 import { StatsService } from '../services/statsService';
+import { GatekeeperService } from '../services/gatekeeperService';
+
+import { Logger } from '../utilities/logger';
+import Guard from '../utilities/guard';
+import ServerUtils from '../utilities/serverUtils';
 
 const MOD = "commandHandler.ts";
 
@@ -37,6 +40,7 @@ export class CommandHandler {
         private configService: ConfigService, 
         private helpService: HelpService,
         private statsService: StatsService,
+        private gatekeeperService: GatekeeperService,
         private logger: Logger) {}
 
     private registerCommand(
@@ -68,12 +72,16 @@ export class CommandHandler {
         this.configService.startup((trigger, action, commandType, preReq) => this.registerCommand(trigger, action, commandType, preReq));
         this.helpService.startup((trigger, action, commandType, preReq) => this.registerCommand(trigger, action, commandType, preReq));
         this.statsService.startup((trigger, action, commandType, preReq) => this.registerCommand(trigger, action, commandType, preReq));
+        this.gatekeeperService.startup((trigger, action, commandType, preReq) => this.registerCommand(trigger, action, commandType, preReq));
 
         this.logger.info(`Command registration complete. Total commands: ${this.commandDefinitions.length}`, MOD);
     }
 
     setup(bot: Discord.Client): void {
         var server = bot.guilds.first();
+
+        Guard.setGuild(server);
+        ServerUtils.setGuild(server);
 
         this.adminService.setup(() => {
             this.logger.info("Destroying bot...", MOD);
@@ -92,10 +100,17 @@ export class CommandHandler {
         this.memberService.setup(server.roles.find((role) => role.name === 'Athlete'));
         this.configService.setup(sotwChannel);
         this.helpService.setup(server.channels.find((chan) => chan.name === "rules"), sotwChannel);
+        this.gatekeeperService.setup(server.roles.find((role) => role.name === "Swamp Fam"), 
+            server.channels.find((chan) => chan.name === "rules"),
+            server.channels.find((chan) => chan.name === "bot-log"));
     }
 
     trigger(trigger: string, msg: Discord.Message, args: string[], commandType: CommandType): boolean {
-        this.logger.info(`Attempting to find handler for ${commandType} command "${trigger}"...`, MOD);
+        var cmdType = "Public";
+        if (commandType === CommandType.Private) cmdType = "Private";
+        else if (commandType === CommandType.All) cmdType = "All";
+
+        this.logger.info(`Attempting to find handler for ${cmdType} command "${trigger}"...`, MOD);
         var foundCommand = this.commandDefinitions.find((cmd) => cmd.trigger === trigger && (cmd.type === CommandType.All || cmd.type === commandType));
 
         if (!foundCommand) {

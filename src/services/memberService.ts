@@ -17,7 +17,17 @@ export class MemberService {
 
     constructor(private memberHandler: MemberHandler, private cmlHandler: CmlHandler, private logger: Logger) {}
 
-    startup(registerCallback: (trigger: string, action: (msg: Discord.Message, args?: string[]) => void, commandType: CommandType, preReq?: (msg: Discord.Message) => boolean) => void): void {
+    startup(registerCallback: (
+        trigger: string, 
+        action: (
+            msg: Discord.Message, 
+            args?: string[]
+        ) => void, 
+        commandType: CommandType, 
+        preReq?: (
+            msg: Discord.Message
+        ) => boolean
+    ) => void): void {
         registerCallback("register", (msg, args) => this.registerMember(msg, args), CommandType.Public);
         registerCallback("check", (msg) => this.checkMember(msg), CommandType.Public);
 

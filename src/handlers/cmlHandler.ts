@@ -414,9 +414,9 @@ export class CmlHandler {
                     return line && line.length > 0 && line[0].toLowerCase().trim() === search.toLowerCase().trim();
                 });
 
-                var formattedSearch = Formatter.formatRSN(search.trim());
+                var formattedSearch = Formatter.formatRSN(search.toLowerCase().trim());
                 if (found && !cells.find((obj) => {
-                    return Formatter.formatRSN(obj[1].trim()) === formattedSearch;
+                    return Formatter.formatRSN(obj[1].toLowerCase().trim()).toLowerCase().trim() === formattedSearch.toLowerCase().trim();
                 })) {
                     reduce++;
                     cells.push(["..", "..", "..", "..", ".."]);

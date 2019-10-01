@@ -47,7 +47,7 @@ export class AdminService {
     logout(msg: Discord.Message): void {
         this.logger.info(`Initiating bot shutdown on behalf of ${msg.author.username}...`, MOD);
     
-        if (!Guard.isDevMode()) ServerUtils.messageChannel(this.auditChannel, `Shutting down by request of ${msg.guild.member(msg.author)} :cry:`);
+        // if (!Guard.isDevMode()) ServerUtils.messageChannel(this.auditChannel, `Shutting down by request of ${msg.guild.member(msg.author)} :cry:`);
 
         this.metricHandler.shutdown(() => this.memberHandler.shutdown(() => this.destroyFunc()));
     }
